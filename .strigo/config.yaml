@@ -1,0 +1,9 @@
+---
+classes:
+  - exercises:
+      - file: "../exercises/00-getting-started/README.md"
+        title: "Step 0: Getting Started"
+        syntax: "md"
+      - file: "../exercises/common/troubleshooting.md"
+        title: "Troubleshooting Guide"
+        syntax: "md"
