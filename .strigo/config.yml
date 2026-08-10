@@ -1,13 +1,9 @@
 ---
 classes:
-  - class_id: "msp-workshop"
-    title: "MSP Workshop"
-    exercises:
+  - exercises:
       - file: "../exercises/00-getting-started/README.md"
         title: "Step 0: Getting Started"
         syntax: "md"
-        exercise_type: "lesson"
       - file: "../exercises/common/troubleshooting.md"
         title: "Troubleshooting Guide"
         syntax: "md"
-        exercise_type: "lesson"
