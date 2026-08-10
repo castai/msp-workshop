@@ -3,9 +3,12 @@
 # install-docker.sh — Idempotent Docker installer for the MSP workshop.
 #
 # If Docker is already installed and the daemon is running, exits 0. If the
-# daemon is not running, attempts to start it (systemctl -> service -> dockerd)
-# without reinstalling. Otherwise installs Docker for the current OS, starts
-# the daemon, and ensures the current user can run docker without sudo.
+# daemon is reachable only with elevated privileges (current user is not in
+# the 'docker' group), adds the user to the group and prints a re-login
+# warning. Otherwise attempts to start the daemon (systemctl -> service)
+# without reinstalling. If Docker is missing entirely, installs it for the
+# current OS, starts the daemon, and ensures the current user can run docker
+# without sudo.
 #
 # Supported: Linux (via the official get.docker.com convenience script) and
 # macOS (via the Homebrew cask for Docker Desktop). Override the installer
@@ -56,6 +59,33 @@ docker_daemon_running() {
   docker info >/dev/null 2>&1
 }
 
+# Check the daemon with elevated privileges. Useful when the current user is
+# not in the 'docker' group: the local 'docker info' will fail with a
+# permission error, but the daemon itself may be running fine.
+docker_daemon_running_privileged() {
+  maybe_sudo docker info >/dev/null 2>&1
+}
+
+# Returns 0 if the systemd 'docker' service (or legacy 'service docker') is
+# already active. Lets us distinguish "user lacks group membership" from
+# "daemon is truly down" without trying to start anything.
+docker_service_active() {
+  if command_exists systemctl; then
+    if maybe_sudo systemctl is-active docker >/dev/null 2>&1; then
+      return 0
+    fi
+    return 1
+  fi
+
+  if command_exists service; then
+    if maybe_sudo service docker status >/dev/null 2>&1; then
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
 detect_os() {
   local os
   os="$(uname -s | tr '[:upper:]' '[:lower:]')"
@@ -76,7 +106,7 @@ start_docker_service() {
     info "  using systemctl..."
     if maybe_sudo systemctl start docker; then
       sleep 2 || true
-      if docker_daemon_running; then
+      if docker_daemon_running_privileged; then
         return 0
       fi
     fi
@@ -86,28 +116,11 @@ start_docker_service() {
     info "  using service..."
     if maybe_sudo service docker start; then
       sleep 2 || true
-      if docker_daemon_running; then
+      if docker_daemon_running_privileged; then
         return 0
       fi
     fi
   fi
-
-  info "  falling back to background dockerd..."
-  if is_root; then
-    nohup dockerd >/var/log/dockerd.log 2>&1 &
-  else
-    sudo sh -c 'nohup dockerd >/var/log/dockerd.log 2>&1 &'
-  fi
-  disown 2>/dev/null || true
-
-  local attempts=15
-  while [[ ${attempts} -gt 0 ]]; do
-    if docker_daemon_running; then
-      return 0
-    fi
-    sleep 1 || true
-    attempts=$((attempts - 1))
-  done
 
   return 1
 }
@@ -200,8 +213,11 @@ Environment:
 
 Behavior:
   - If 'docker' is installed and 'docker info' succeeds, exits 0.
-  - If 'docker' is installed but the daemon is not running, attempts to
-    start it (systemctl -> service -> background dockerd).
+  - If 'docker' is installed but the daemon is not reachable by the current
+    user, checks the daemon with elevated privileges: if the daemon (or its
+    systemd unit) is already running, adds the user to the 'docker' group
+    and prints a re-login warning. Otherwise starts the daemon via
+    systemctl (or the legacy 'service' command).
   - If 'docker' is missing, installs it for the current OS, starts the
     daemon, and ensures the current user is in the 'docker' group.
 
@@ -221,23 +237,39 @@ EOF
   local os
   os="$(detect_os)"
 
-  # Already installed and running -> nothing to do.
+  # Already installed -> check whether the daemon is actually usable.
   if docker_installed; then
     if docker_daemon_running; then
       log "Docker is already installed and the daemon is running"
       exit 0
     fi
 
-    warn "Docker is installed but the daemon is not running"
+    warn "Docker is installed but 'docker info' failed"
+
     if [[ "${os}" == "darwin" ]]; then
       err "on macOS, launch Docker Desktop and re-run this script"
       exit 1
     fi
 
+    # Daemon may be running but the current user lacks group membership
+    # (classic Strigo-lab scenario: 'docker info' fails with permission denied
+    # while 'sudo docker info' and 'systemctl is-active docker' succeed).
+    if docker_daemon_running_privileged || docker_service_active; then
+      warn "Docker daemon is running, but the current user cannot access it"
+      if ensure_user_in_docker_group; then
+        print_relogin_warning
+      else
+        warn "could not add the current user to the 'docker' group automatically"
+        warn "run 'sudo usermod -aG docker \$USER' and re-login"
+      fi
+      exit 0
+    fi
+
+    # Daemon is genuinely down: try systemctl, then legacy service.
     info "attempting to start the daemon..."
     if ! start_docker_service; then
       err "Docker is installed but the daemon failed to start"
-      err "try 'sudo systemctl status docker' or check /var/log/dockerd.log"
+      err "try 'sudo systemctl status docker' or 'journalctl -u docker'"
       exit 1
     fi
     log "Docker daemon started"

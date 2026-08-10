@@ -104,6 +104,27 @@ install_binary() {
   ensure_path "${dir}"
 }
 
+# Add the current user to the 'docker' group if they are not already a member.
+# Returns 0 if the user was newly added (so callers can warn about re-login).
+ensure_user_in_docker_group_kind() {
+  if ! getent group docker >/dev/null 2>&1; then
+    sudo groupadd docker || true
+  fi
+
+  local current_user
+  current_user="${USER:-$(id -un 2>/dev/null)}"
+  if [[ -z "${current_user}" ]]; then
+    return 1
+  fi
+
+  if id -nG "${current_user}" 2>/dev/null | tr ' ' '\n' | grep -qx docker; then
+    return 1
+  fi
+
+  sudo usermod -aG docker "${current_user}"
+  return 0
+}
+
 check_docker() {
   log "checking Docker..."
   if ! command_exists docker; then
@@ -121,13 +142,28 @@ check_docker() {
   fi
 
   if ! docker info >/dev/null 2>&1; then
+    # Distinguish "user lacks group membership" from "daemon truly down".
+    # Strigo-lab scenario: 'docker info' fails with permission denied while
+    # 'sudo docker info' succeeds because the systemd unit is already active.
+    if sudo docker info >/dev/null 2>&1; then
+      if ensure_user_in_docker_group_kind; then
+        warn "Docker daemon is running, but the current user cannot access it."
+        warn "Added to the 'docker' group. Please log out/in (or run 'newgrp docker') and re-run."
+      else
+        warn "Docker daemon is running, but the current user cannot access it."
+        warn "Add yourself to the 'docker' group (sudo usermod -aG docker \$USER) and re-login."
+      fi
+      return 1
+    fi
+
     warn "Docker daemon is not running; attempting to start it..."
     local started=0
     if command_exists systemctl; then
       if sudo systemctl start docker; then
         started=1
       fi
-    elif command_exists service; then
+    fi
+    if [[ "${started}" -ne 1 ]] && command_exists service; then
       if sudo service docker start; then
         started=1
       fi
