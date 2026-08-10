@@ -67,4 +67,4 @@ log "cleanup complete"
 printf "==================================================\n"
 printf '\n'
 printf "To set up the workshop again:\n"
-printf "  ./exercises/common/setup/install-kind.sh\n"
+printf "  ./install-kind.sh\n"

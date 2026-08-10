@@ -51,7 +51,7 @@ if kind get clusters 2>/dev/null | grep -q "^${CLUSTER_NAME}$"; then
   pass "cluster '${CLUSTER_NAME}' exists"
 else
   fail "cluster '${CLUSTER_NAME}' not found"
-  info "run: ./exercises/common/setup/install-kind.sh"
+  info "run: ./install-kind.sh"
   exit 1
 fi
 printf "\n"
@@ -126,7 +126,7 @@ else
   fail "health check failed with ${ERRORS} error(s) and ${WARNINGS} warning(s)"
   printf "==================================================\n"
   printf "Common fixes:\n"
-  printf "  - Reinstall cluster: ./exercises/common/setup/install-kind.sh --recreate\n"
+  printf "  - Reinstall cluster: ./install-kind.sh --recreate\n"
   printf "  - See troubleshooting: exercises/common/troubleshooting.md\n"
   exit 1
 fi

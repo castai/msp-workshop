@@ -16,7 +16,7 @@ on your `PATH` and working:
 - `cast-cli` — the MSP workshop CLI used to interact with the lab environment
 
 Rather than asking you to run each install by hand, the lesson ships an
-idempotent helper script, `validate-setup.sh`, located in this directory. The
+idempotent helper script, `validate-setup.sh`, located in `../../setup/`. The
 script:
 
 1. Probes your environment for the tools above.
@@ -398,10 +398,11 @@ defined and inspect the profile file directly if it is not.
 
 ## 5. Using the `validate-setup.sh` script
 
-The lesson ships an idempotent helper script, `validate-setup.sh`, located
-in this directory (`exercises/00-getting-started/`). Instead of running the
-install blocks in sections 1, 2, 3, and 4 by hand, you can run the script
-once and let it do all of that work for you. The script:
+The workshop ships an idempotent helper script, `validate-setup.sh`,
+located in `../../setup/` (the `setup/` directory at the repository
+root). Instead of running the install blocks in sections 1, 2, 3, and 4
+by hand, you can run the script once and let it do all of that work for
+you. The script:
 
 1. Checks whether `kubectl`, `helm`, and `cast-cli` are installed and on
    your `PATH`.
@@ -416,13 +417,21 @@ once and let it do all of that work for you. The script:
 
 ### 5.1 Run the script from the lesson directory
 
-The script lives in the lesson directory itself, so the simplest way to
-run it is to `cd` into the directory, mark it executable, and execute it:
+The script lives in `../../setup/` at the repository root, so the
+simplest way to run it from this lesson directory is to use its relative
+path:
 
 ```bash
-cd exercises/00-getting-started
-chmod +x validate-setup.sh
-./validate-setup.sh
+chmod +x ../../setup/validate-setup.sh
+../../setup/validate-setup.sh
+```
+
+If you prefer to run it from the repository root instead, the same
+script is reachable as `./setup/validate-setup.sh`:
+
+```bash
+cd ../..
+./setup/validate-setup.sh
 ```
 
 If you do not already have the script on disk (for example because you
@@ -447,7 +456,7 @@ if you are prompted.
 ### 5.2 Safe to re-run
 
 Because the script probes each tool before installing it, you can run
-`./validate-setup.sh` as many times as you like without side effects:
+`../../setup/validate-setup.sh` as many times as you like without side effects:
 
 - **Already-installed tools are left alone.** If `kubectl`, `helm`, or
   `cast-cli` is already on your `PATH` and reports a version, the script
@@ -504,12 +513,11 @@ corporate proxies, locked-down `/usr/local/bin`, missing `sudo`,
 read-only profile files, and so on) and explains how to recover from
 each one.
 
-After fixing the underlying issue, re-run the same two commands from
+After fixing the underlying issue, re-run the script from
 [section 5.1](#51-run-the-script-from-the-lesson-directory):
 
 ```bash
-cd exercises/00-getting-started
-./validate-setup.sh
+../../setup/validate-setup.sh
 ```
 
 When the script finishes with `All checks passed.`, you are ready to

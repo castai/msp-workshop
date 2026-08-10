@@ -107,13 +107,41 @@ install_binary() {
 check_docker() {
   log "checking Docker..."
   if ! command_exists docker; then
-    err "Docker is not installed. Install Docker Desktop or your OS package first."
-    return 1
+    warn "Docker not found; running installer..."
+    local installer
+    installer="$(dirname "$0")/install-docker.sh"
+    if ! bash "${installer}"; then
+      err "Docker installer failed. Install Docker manually and try again."
+      return 1
+    fi
+    if ! command_exists docker; then
+      err "Docker install reported success but 'docker' is still not on PATH."
+      return 1
+    fi
   fi
 
   if ! docker info >/dev/null 2>&1; then
-    err "Docker daemon is not running. Start Docker and try again."
-    return 1
+    warn "Docker daemon is not running; attempting to start it..."
+    local started=0
+    if command_exists systemctl; then
+      if sudo systemctl start docker; then
+        started=1
+      fi
+    elif command_exists service; then
+      if sudo service docker start; then
+        started=1
+      fi
+    fi
+
+    if [[ "${started}" -ne 1 ]]; then
+      err "could not start Docker daemon. Start it manually and try again."
+      return 1
+    fi
+
+    if ! docker info >/dev/null 2>&1; then
+      err "Docker daemon did not become available after start. Check 'systemctl status docker' or 'docker info' manually."
+      return 1
+    fi
   fi
 
   local mem_gb
@@ -290,7 +318,7 @@ main() {
   log "setup complete!"
   info "cluster: workshop-cluster"
   info "context: kind-workshop-cluster"
-  info "next: ./exercises/common/setup/verify-kind.sh"
+  info "next: ./verify-kind.sh"
 }
 
 main "$@"

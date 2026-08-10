@@ -147,7 +147,7 @@ To make `validate-setup.sh` run end-to-end without interaction, pick one of the 
 
   This lets the script call `sudo -n install ...` without a password prompt.
 
-- **Run the script under a user that can write to `/usr/local/bin`.** For example, log in as `root` (or a user in a group that owns `/usr/local/bin`) and re-run `./validate-setup.sh`.
+- **Run the script under a user that can write to `/usr/local/bin`.** For example, log in as `root` (or a user in a group that owns `/usr/local/bin`) and re-run `../../setup/validate-setup.sh`.
 
 - **Pre-install the CLIs into `/usr/local/bin` as root** (using `sudo install ...` as shown above), then re-run `validate-setup.sh`. The script is idempotent: each `install_*` function detects the already-installed binary and skips it.
 
@@ -290,7 +290,7 @@ rm -f "$HOME/.local/bin/cast-cli"
 The simplest path back to a working install is to let the helper script pick the correct binary for your machine:
 
 ```bash
-./exercises/00-getting-started/validate-setup.sh
+../../setup/validate-setup.sh
 ```
 
 `validate-setup.sh` detects the host architecture with `uname -m`, applies the mapping in the table above (`x86_64`/`amd64` -> `amd64`, `aarch64`/`arm64` -> `arm64`), and downloads the matching archive. After it completes, verify that the tools run:
@@ -452,7 +452,7 @@ If your environment uses a PAC file or a WARP / Zscaler / Netskope agent, make s
 
 ### Workshop helper note
 
-The `validate-setup.sh` script used during the workshop already knows about the `castctl` -> `cast-cli` rename: if it finds `castctl` on `PATH` but no `cast-cli`, it automatically creates the symlink described in step 3 before it gives up. So running `./exercises/00-getting-started/validate-setup.sh` after a successful installer run is usually enough to repair this case without manual intervention.
+The `validate-setup.sh` script used during the workshop already knows about the `castctl` -> `cast-cli` rename: if it finds `castctl` on `PATH` but no `cast-cli`, it automatically creates the symlink described in step 3 before it gives up. So running `../../setup/validate-setup.sh` after a successful installer run is usually enough to repair this case without manual intervention.
 
 ### Quick checklist
 

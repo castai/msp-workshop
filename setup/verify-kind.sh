@@ -34,7 +34,7 @@ if kind get clusters 2>/dev/null | grep -q "^${CLUSTER_NAME}$"; then
   pass "cluster '${CLUSTER_NAME}' exists"
 else
   fail "cluster '${CLUSTER_NAME}' not found"
-  info "run: ./exercises/common/setup/install-kind.sh"
+  info "run: ./install-kind.sh"
   exit 1
 fi
 printf "\n"
