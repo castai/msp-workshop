@@ -1,0 +1,68 @@
+# =============================================================================
+# E-commerce demo — load generator
+#
+# Single Deployment with two busybox containers that drive continuous HTTP
+# traffic at web-frontend and order-service. The requests run sequentially
+# (foreground `wget` in a `while true` loop) so we get a tight, predictable
+# request rate without spawning background sub-shells.
+#
+# Limits are deliberately small (cpu 100m / memory 64Mi) so the load
+# generator itself stays cheap and does not starve the cluster.
+# =============================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: load-generator
+  namespace: demo-ecommerce
+  labels:
+    app: load-generator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: load-generator
+  template:
+    metadata:
+      labels:
+        app: load-generator
+    spec:
+      containers:
+        - name: load-frontend
+          image: busybox:1.36
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "Generating load on web-frontend...";
+              while true; do
+                wget -q -O- http://web-frontend.demo-ecommerce.svc.cluster.local > /dev/null 2>&1;
+                wget -q -O- http://web-frontend.demo-ecommerce.svc.cluster.local > /dev/null 2>&1;
+                wget -q -O- http://web-frontend.demo-ecommerce.svc.cluster.local > /dev/null 2>&1;
+                wget -q -O- http://web-frontend.demo-ecommerce.svc.cluster.local > /dev/null 2>&1;
+              done
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
+        - name: load-orders
+          image: busybox:1.36
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "Generating load on order-service...";
+              while true; do
+                wget -q -O- http://order-service.demo-ecommerce.svc.cluster.local > /dev/null 2>&1;
+                wget -q -O- http://order-service.demo-ecommerce.svc.cluster.local > /dev/null 2>&1;
+                wget -q -O- http://order-service.demo-ecommerce.svc.cluster.local > /dev/null 2>&1;
+                wget -q -O- http://order-service.demo-ecommerce.svc.cluster.local > /dev/null 2>&1;
+              done
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"

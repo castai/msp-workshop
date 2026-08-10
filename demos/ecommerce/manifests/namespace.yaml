@@ -1,0 +1,13 @@
+# =============================================================================
+# E-commerce demo — namespace
+#
+# Isolates the e-commerce demo from the rest of the cluster so it can be
+# torn down with a single `kubectl delete namespace demo-ecommerce`.
+# =============================================================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo-ecommerce
+  labels:
+    workshop: "true"
+    demo: "ecommerce"

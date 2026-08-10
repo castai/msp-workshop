@@ -1,0 +1,62 @@
+# =============================================================================
+# E-commerce demo — HorizontalPodAutoscalers
+#
+# Scales web-frontend and order-service on average CPU utilization.
+#
+# Tuning:
+#   * target 50% — trigger well before saturation; gives HPA time to add
+#     replicas before users feel latency
+#   * min 2 — always keep at least one spare for HA / rolling updates
+#   * max 10 — headroom for the load generator to actually trigger scaling
+#             on the 3-node kind cluster (the third worker can absorb ~3
+#             extra pods per workload before HPA stalls on capacity)
+#
+# Requires metrics-server. deploy.sh installs metrics-server if it is
+# missing.
+# =============================================================================
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: web-frontend
+  namespace: demo-ecommerce
+  labels:
+    app: web-frontend
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: web-frontend
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: order-service
+  namespace: demo-ecommerce
+  labels:
+    app: order-service
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: order-service
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
