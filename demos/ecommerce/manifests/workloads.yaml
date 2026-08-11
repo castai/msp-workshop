@@ -10,9 +10,8 @@
 #   * CPU request 200m / limit 1000m — sane HPA utilization math
 #   * Memory request 128Mi / limit 256Mi
 #   * Replicas: 2 — minimum for HA, small enough for the kind cluster
-#   * nodeSelector workshop-role=worker — pods land on the 3 worker nodes
-#   * topology spread across kubernetes.io/hostname — pods spread across
-#     the 3 worker nodes instead of stacking on one
+#   * Topology spread constraints (maxSkew 1, ScheduleAnyway) — pods
+#     are spread across nodes for HA without requiring any node labels
 #   * readiness + liveness probes — traffic only hits ready pods
 #   * ClusterIP Service per workload — reachable inside the cluster
 # =============================================================================
@@ -38,15 +37,6 @@ spec:
         app: web-frontend
         tier: frontend
     spec:
-      nodeSelector:
-        workshop-role: worker
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: ScheduleAnyway
-          labelSelector:
-            matchLabels:
-              app: web-frontend
       containers:
         - name: web-frontend
           image: registry.k8s.io/hpa-example
@@ -71,6 +61,13 @@ spec:
               port: 80
             initialDelaySeconds: 10
             periodSeconds: 15
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: web-frontend
 ---
 apiVersion: v1
 kind: Service
@@ -107,15 +104,6 @@ spec:
         app: order-service
         tier: backend
     spec:
-      nodeSelector:
-        workshop-role: worker
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: ScheduleAnyway
-          labelSelector:
-            matchLabels:
-              app: order-service
       containers:
         - name: order-service
           image: registry.k8s.io/hpa-example
@@ -140,6 +128,13 @@ spec:
               port: 80
             initialDelaySeconds: 10
             periodSeconds: 15
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: order-service
 ---
 apiVersion: v1
 kind: Service
@@ -177,15 +172,6 @@ spec:
         app: notification-service
         tier: backend
     spec:
-      nodeSelector:
-        workshop-role: worker
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: ScheduleAnyway
-          labelSelector:
-            matchLabels:
-              app: notification-service
       containers:
         - name: notification-service
           image: nginx:1.27-alpine
@@ -210,6 +196,13 @@ spec:
               port: 80
             initialDelaySeconds: 10
             periodSeconds: 15
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: notification-service
 ---
 apiVersion: v1
 kind: Service

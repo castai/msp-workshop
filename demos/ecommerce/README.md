@@ -2,7 +2,7 @@
 
 A working, stress-testable e-commerce platform deployed to the
 `workshop-cluster` kind cluster. Provides realistic resource requests,
-an autoscaler, a PodDisruptionBudget, topology spread, and a continuous
+an autoscaler, a PodDisruptionBudget, and a continuous
 load generator.
 
 The intent is to give MSP engineers a target system they can poke at:
@@ -28,8 +28,6 @@ demos/ecommerce/
 
 - A healthy `kind-workshop-cluster` (created via `setup/setup-all.sh`).
 - `kubectl` and `helm` on your PATH.
-- 3 worker nodes labeled `workshop-role=worker` — already true for the
-  default kind config used by `setup/install-kind.sh`.
 
 ## Deploy
 
@@ -53,7 +51,7 @@ What it does:
 Once `deploy.sh` finishes:
 
 ```bash
-# Pods (should be Running, spread across the 3 workers)
+# Pods (should be Running)
 kubectl get pods -n demo-ecommerce -o wide
 
 # HPA registration (targets should show <unknown>/50% until metrics flow)
@@ -138,8 +136,8 @@ Or wipe the whole cluster:
 | notification-service  | `nginx:1.27-alpine`              | 2                  | 200m / 1000m  | 128Mi / 256Mi    |
 | load-generator        | `busybox:1.36` (x2 containers)   | 1                  | 10m / 100m    | 32Mi / 64Mi      |
 
-- All production pods: `nodeSelector: {workshop-role: worker}` and a
-  `topologySpreadConstraints` on `kubernetes.io/hostname` so replicas
-  spread across the 3 worker nodes.
 - HPAs target `cpu` `averageUtilization: 50%`.
 - PDBs hold `minAvailable: 1` for web-frontend and order-service.
+- Pods are spread across nodes via topology spread constraints
+  (`maxSkew: 1`, `ScheduleAnyway`) so replicas land on different
+  nodes for HA without requiring any node labels.
