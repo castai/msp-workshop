@@ -1,0 +1,6 @@
+dependencies:
+- name: onlineboutique
+  repository: oci://us-docker.pkg.dev/online-boutique-ci/charts
+  version: 0.10.6
+digest: sha256:7bfd57c976da05aced2e894886c79c4855e50b3a89562af4d8d1b189bdcc5108
+generated: "2026-08-07T16:35:53.949545+03:00"

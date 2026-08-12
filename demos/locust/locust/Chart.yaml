@@ -1,0 +1,9 @@
+apiVersion: v2
+name: locust
+description: A shared Locust load generator for the CAST AI Autoscaler Workshop demo apps.
+type: application
+version: 0.1.0
+appVersion: "2.32.2"
+home: https://locust.io
+sources:
+  - https://github.com/locustio/locust

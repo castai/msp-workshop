@@ -1,0 +1,48 @@
+# Default values for the shared Locust load generator.
+
+nameOverride: ""
+fullnameOverride: ""
+
+# Number of Locust worker replicas. Keep at 0 to run a single local-mode pod
+# (master+worker in one process), or scale up for distributed load.
+workerCount: 0
+
+image:
+  repository: locustio/locust
+  tag: 2.32.2
+  pullPolicy: IfNotPresent
+
+# Default target host is intentionally empty. When empty, the chart omits the
+# `--host` argument so Locust starts with no default host and the web UI
+# prompts the user for one. Workshop users enter the target application's URL
+# directly in the Locust web UI (see README.md).
+targetHost: ""
+
+# Default user class is intentionally empty. When empty, the chart omits the
+# LOCUST_USER_CLASSES env var so the Locust UI shows every class registered
+# in the locustfile (BoutiqueUser, BankUser, GenericUser) and lets users pick.
+taskSet: ""
+
+# Optional extra command-line flags passed to Locust.
+extraArgs:
+  - --web-port
+  - "8089"
+  - --web-host
+  - "0.0.0.0"
+
+service:
+  type: LoadBalancer
+  port: 8089
+  targetPort: 8089
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

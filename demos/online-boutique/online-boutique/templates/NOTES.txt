@@ -1,0 +1,12 @@
+Online Boutique has been deployed.
+
+The frontend is exposed via a LoadBalancer Service named:
+  {{ .Release.Name }}-frontend
+in namespace:
+  {{ .Release.Namespace }}
+
+Get the external URL with:
+  kubectl get svc {{ .Release.Name }}-frontend -n {{ .Release.Namespace }} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+
+The in-cluster URL is:
+  http://frontend.{{ .Release.Namespace }}.svc.cluster.local

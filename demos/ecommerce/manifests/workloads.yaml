@@ -9,7 +9,7 @@
 # Production-quality configuration so the demo can be load-tested:
 #   * CPU request 200m / limit 1000m — sane HPA utilization math
 #   * Memory request 128Mi / limit 256Mi
-#   * Replicas: 2 — minimum for HA, small enough for the kind cluster
+#   * Replicas: 2 — minimum for HA, small enough for a 3-node cluster
 #   * Topology spread constraints (maxSkew 1, ScheduleAnyway) — pods
 #     are spread across nodes for HA without requiring any node labels
 #   * readiness + liveness probes — traffic only hits ready pods
@@ -75,7 +75,7 @@ metadata:
   name: web-frontend
   namespace: demo-ecommerce
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: web-frontend
   ports:

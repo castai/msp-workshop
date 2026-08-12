@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    application: bank-of-anthos
+    environment: development
+    team: accounts
+    tier: db
+  name: accounts-db
+spec:
+  ports:
+    - name: tcp
+      port: 5432
+      protocol: TCP
+      targetPort: 5432
+  selector:
+    app: accounts-db
+    application: bank-of-anthos
+    environment: development
+    team: accounts
+    tier: db
+  type: {{ .Values.accounts_db.service.type }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    application: bank-of-anthos
+    environment: development
+    team: accounts
+    tier: db
+  name: accounts-db
+spec:
+  replicas: {{ .Values.accounts_db.replicaCount }}
+
+  selector:
+    matchLabels:
+      app: accounts-db
+      application: bank-of-anthos
+      environment: development
+      team: accounts
+      tier: db
+  serviceName: accounts-db
+  template:
+    metadata:
+      labels:
+        app: accounts-db
+        application: bank-of-anthos
+        environment: development
+        team: accounts
+        tier: db
+    spec:
+      {{- with .Values.accounts_db.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.accounts_db.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.accounts_db.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - envFrom:
+            - configMapRef:
+                name: environment-config
+            - configMapRef:
+                name: accounts-db-config
+            - configMapRef:
+                name: demo-data-config
+          image: {{ .Values.accounts_db.image.repository }}:{{ .Values.accounts_db.image.tag }}
+          name: accounts-db
+          ports:
+            - containerPort: 5432
+          resources:
+          {{- toYaml .Values.accounts_db.resources | nindent 10 }}
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgresdb
+              subPath: postgres
+      serviceAccount: bank-of-anthos
+      serviceAccountName: default
+      volumes:
+        - emptyDir: {}
+          name: postgresdb

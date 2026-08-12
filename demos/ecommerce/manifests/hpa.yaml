@@ -8,8 +8,8 @@
 #     replicas before users feel latency
 #   * min 2 — always keep at least one spare for HA / rolling updates
 #   * max 10 — headroom for the load generator to actually trigger scaling
-#             on the 3-node kind cluster (the third worker can absorb ~3
-#             extra pods per workload before HPA stalls on capacity)
+#             on a 3-node cluster (the third worker can absorb ~3 extra
+#             pods per workload before HPA stalls on capacity)
 #
 # Requires metrics-server. deploy.sh installs metrics-server if it is
 # missing.

@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "locust.fullname" . }}-locustfile
+  labels:
+    {{- include "locust.labels" . | nindent 4 }}
+data:
+  locustfile.py: |
+    import random
+    from locust import HttpUser, task, between
+
+    class BoutiqueUser(HttpUser):
+        wait_time = between(1, 5)
+
+        @task(10)
+        def index(self):
+            self.client.get("/", name="index")
+
+        @task(5)
+        def view_product(self):
+            product_id = random.choice([
+                "OLJCESPC7Z", "66VCHSJNUP", "1YMWWN1N4O",
+                "L9ECAV7KIM", "2ZYFJ3GM2N", "0PUK6V6EV0"
+            ])
+            self.client.get(f"/product/{product_id}", name="/product/:id")
+
+        @task(3)
+        def view_cart(self):
+            self.client.get("/cart", name="/cart")
+
+        @task(1)
+        def checkout(self):
+            self.client.post("/cart/checkout", name="/cart/checkout")
+
+    class BankUser(HttpUser):
+        wait_time = between(2, 6)
+
+        @task(10)
+        def index(self):
+            self.client.get("/", name="index")
+
+        @task(5)
+        def login(self):
+            self.client.post("/login", data={"username": "testuser", "password": "password"}, name="/login")
+
+        @task(5)
+        def home(self):
+            self.client.get("/home", name="/home")
+
+    class GenericUser(HttpUser):
+        # Hits GET / repeatedly with a short wait. Works against any HTTP
+        # frontend (e.g. E-commerce, Online Boutique, Bank of Anthos) that
+        # responds on /. Use this when in doubt about which class to pick.
+        wait_time = between(0.5, 2)
+
+        @task
+        def index(self):
+            self.client.get("/", name="index")

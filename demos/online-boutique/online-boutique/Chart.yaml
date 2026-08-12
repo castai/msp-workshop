@@ -1,0 +1,17 @@
+apiVersion: v2
+name: online-boutique
+description: |
+  Wrapper chart that deploys the upstream Online Boutique (microservices-demo)
+  application using its official Helm chart. The upstream loadgenerator is
+  disabled because the workshop uses a shared Locust load generator.
+type: application
+version: 0.1.0
+appVersion: "v0.10.6"
+home: https://github.com/GoogleCloudPlatform/microservices-demo
+sources:
+  - https://github.com/GoogleCloudPlatform/microservices-demo
+dependencies:
+  - name: onlineboutique
+    version: 0.10.6
+    repository: oci://us-docker.pkg.dev/online-boutique-ci/charts
+    condition: onlineboutique.enabled

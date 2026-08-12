@@ -1,0 +1,47 @@
+# Default values for the online-boutique wrapper chart.
+#
+# This chart depends on the upstream Online Boutique Helm chart. All values
+# under "onlineboutique:" are passed through to that subchart. Resource limits
+# and requests can be customized per service via the upstream chart's
+# per-service keys (e.g. onlineboutique.frontend.resources).
+
+onlineboutique:
+  enabled: true
+
+  # Use the pinned upstream v0.10.6 images from the Online Boutique CI registry.
+  images:
+    repository: us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo
+    tag: v0.10.6
+
+  # Do NOT let the upstream subchart create its own frontend LoadBalancer.
+  # This wrapper chart ships its own LoadBalancer Service at
+  # templates/frontend.yaml named "<release>-frontend". Setting
+  # externalService: false here avoids a duplicate Service.
+  frontend:
+    externalService: false
+
+  # Disable the built-in load generator; the workshop uses its own Locust chart.
+  loadGenerator:
+    create: false
+
+  # Disable optional components that are not needed in the EKS workshop.
+  shoppingAssistantService:
+    create: false
+  networkPolicies:
+    create: false
+  sidecars:
+    create: false
+  authorizationPolicies:
+    create: false
+  opentelemetryCollector:
+    create: false
+  googleCloudOperations:
+    profiler: false
+    tracing: false
+    metrics: false
+
+  # Keep the in-cluster Redis cart database.
+  cartDatabase:
+    type: redis
+    inClusterRedis:
+      create: true

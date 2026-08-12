@@ -1,0 +1,170 @@
+# Default values for bank-of-anthos.
+#
+# Per-service overrides for replica count, image, resources, service type, and
+# scheduling constraints. The frontend is exposed via a LoadBalancer Service by
+# default; all other services use ClusterIP.
+
+nameOverride: ''
+fullnameOverride: ''
+frontend:
+  replicaCount: 1
+  image:
+    repository: us-central1-docker.pkg.dev/bank-of-anthos-ci/bank-of-anthos/frontend
+    tag: v0.6.10
+  resources:
+    requests:
+      cpu: 100m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 128Mi
+  service:
+    type: LoadBalancer
+    port: 80
+    targetPort: 8080
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+accounts_db:
+  replicaCount: 1
+  image:
+    repository: us-central1-docker.pkg.dev/bank-of-anthos-ci/bank-of-anthos/accounts-db
+    tag: v0.6.10
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 512Mi
+  service:
+    type: ClusterIP
+    port: 5432
+    targetPort: 5432
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+ledger_db:
+  replicaCount: 1
+  image:
+    repository: us-central1-docker.pkg.dev/bank-of-anthos-ci/bank-of-anthos/ledger-db
+    tag: v0.6.10
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 250m
+      memory: 1Gi
+  service:
+    type: ClusterIP
+    port: 5432
+    targetPort: 5432
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+balancereader:
+  replicaCount: 1
+  image:
+    repository: us-central1-docker.pkg.dev/bank-of-anthos-ci/bank-of-anthos/balancereader
+    tag: v0.6.10
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+      ephemeral-storage: 0.5Gi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+      ephemeral-storage: 0.5Gi
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+contacts:
+  replicaCount: 1
+  image:
+    repository: us-central1-docker.pkg.dev/bank-of-anthos-ci/bank-of-anthos/contacts
+    tag: v0.6.10
+  resources:
+    requests:
+      cpu: 100m
+      memory: 64Mi
+      ephemeral-storage: 0.25Gi
+    limits:
+      cpu: 250m
+      memory: 128Mi
+      ephemeral-storage: 0.25Gi
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+ledgerwriter:
+  replicaCount: 1
+  image:
+    repository: us-central1-docker.pkg.dev/bank-of-anthos-ci/bank-of-anthos/ledgerwriter
+    tag: v0.6.10
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+      ephemeral-storage: 0.5Gi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+      ephemeral-storage: 0.5Gi
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+transactionhistory:
+  replicaCount: 1
+  image:
+    repository: us-central1-docker.pkg.dev/bank-of-anthos-ci/bank-of-anthos/transactionhistory
+    tag: v0.6.10
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+      ephemeral-storage: 0.5Gi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+      ephemeral-storage: 0.5Gi
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+userservice:
+  replicaCount: 1
+  image:
+    repository: us-central1-docker.pkg.dev/bank-of-anthos-ci/bank-of-anthos/userservice
+    tag: v0.6.10
+  resources:
+    requests:
+      cpu: 260m
+      memory: 128Mi
+      ephemeral-storage: 0.25Gi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+      ephemeral-storage: 0.25Gi
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}

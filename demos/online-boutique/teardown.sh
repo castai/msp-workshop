@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 #
-# teardown.sh — Remove the E-commerce demo.
+# teardown.sh — Remove the Online Boutique demo.
 #
-# Deletes the 'demo-ecommerce' namespace. Everything inside it (workloads,
-# services, HPAs, and PDBs) goes with it.
+# Deletes the 'online-boutique' namespace. Everything inside it (the wrapper
+# release, the upstream Online Boutique workloads, and the LoadBalancer
+# frontend Service) goes with it.
 #
-# metrics-server is intentionally left in place — it is shared by the rest
-# of the workshop. Remove it with: helm uninstall metrics-server -n kube-system
+# The shared Locust demo and metrics-server are intentionally left in place
+# — they are used by other demos.
 #
 # Usage:
 #   ./teardown.sh
@@ -14,7 +15,7 @@
 
 set -euo pipefail
 
-# ANSI colors for messages. Matches setup/*.sh.
+# ANSI colors for messages. Matches demos/ecommerce/deploy.sh.
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -26,7 +27,7 @@ warn() { printf "${YELLOW}[teardown]${NC} %s\n" "$*" >&2; }
 err() { printf "${RED}[teardown]${NC} %s\n" "$*" >&2; }
 info() { printf "${BLUE}[teardown]${NC} %s\n" "$*"; }
 
-NAMESPACE="demo-ecommerce"
+NAMESPACE="online-boutique"
 
 command_exists() {
   command -v "$1" >/dev/null 2>&1
@@ -53,7 +54,7 @@ main() {
 
   printf '%b' "${BLUE}"
   printf '============================================================\n'
-  printf '  E-commerce demo — teardown\n'
+  printf '  Online Boutique demo - teardown\n'
   printf '============================================================\n'
   printf '%b' "${NC}"
   printf '\n'
@@ -74,7 +75,8 @@ main() {
   fi
 
   if [[ "${skip_confirm}" -ne 1 ]]; then
-    warn "this will delete the '${NAMESPACE}' namespace and everything inside it."
+    warn "this will delete the '${NAMESPACE}' namespace and everything inside it"
+    warn "(the Online Boutique frontend LoadBalancer Service will be removed too)."
     read -r -p "Continue? (yes/no): " reply
     if [[ "${reply}" != "yes" ]]; then
       info "teardown cancelled."
@@ -83,15 +85,15 @@ main() {
     printf '\n'
   fi
 
-  info "deleting namespace '${NAMESPACE}'..."
-  kubectl delete namespace "${NAMESPACE}" --wait=true --timeout=180s
+  info "deleting namespace '${NAMESPACE}' (this can take up to 5 minutes)..."
+  kubectl delete namespace "${NAMESPACE}" --wait=true --timeout=300s
 
   printf '\n'
   log "namespace '${NAMESPACE}' removed"
 
   printf '\n'
-  info "metrics-server is left in place (it is shared with other demos)."
-  info "to remove it as well, run: helm uninstall metrics-server -n kube-system"
+  info "the shared Locust demo (../locust) is left in place."
+  info "to remove it as well, run: ./teardown.sh in demos/locust/."
   printf '\n'
 }
 

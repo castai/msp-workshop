@@ -1,0 +1,128 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "locust.fullname" . }}
+  labels:
+    {{- include "locust.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "locust.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "locust.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: locust
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - locust
+          args:
+            - -f
+            - /mnt/locust/locustfile.py
+            {{- if .Values.targetHost }}
+            - --host
+            - {{ .Values.targetHost | quote }}
+            {{- end }}
+            {{- range .Values.extraArgs }}
+            - {{ . | quote }}
+            {{- end }}
+          env:
+            {{- if .Values.taskSet }}
+            - name: LOCUST_USER_CLASSES
+              value: {{ if eq .Values.taskSet "bank" }}"BankUser"{{ else }}"BoutiqueUser"{{ end }}
+            {{- end }}
+            {{- if gt (int .Values.workerCount) 0 }}
+            - name: LOCUST_MODE_MASTER
+              value: "true"
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: locustfile
+              mountPath: /mnt/locust
+              readOnly: true
+      volumes:
+        - name: locustfile
+          configMap:
+            name: {{ include "locust.fullname" . }}-locustfile
+---
+{{- if gt (int .Values.workerCount) 0 }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "locust.fullname" . }}-worker
+  labels:
+    {{- include "locust.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  replicas: {{ .Values.workerCount }}
+  selector:
+    matchLabels:
+      {{- include "locust.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        {{- include "locust.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: worker
+    spec:
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: locust
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - locust
+          args:
+            - -f
+            - /mnt/locust/locustfile.py
+            - --worker
+            - --master-host
+            - {{ include "locust.fullname" . }}
+          env:
+            {{- if .Values.taskSet }}
+            - name: LOCUST_USER_CLASSES
+              value: {{ if eq .Values.taskSet "bank" }}"BankUser"{{ else }}"BoutiqueUser"{{ end }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: locustfile
+              mountPath: /mnt/locust
+              readOnly: true
+      volumes:
+        - name: locustfile
+          configMap:
+            name: {{ include "locust.fullname" . }}-locustfile
+{{- end }}

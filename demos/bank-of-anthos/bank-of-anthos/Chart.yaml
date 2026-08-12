@@ -1,0 +1,12 @@
+apiVersion: v2
+name: bank-of-anthos
+description: |
+  Helm chart for the Bank of Anthos demo application. Uses the upstream v0.6.10
+  container images and exposes per-service replica, resource, and scheduling
+  overrides.
+type: application
+version: 0.1.0
+appVersion: "v0.6.10"
+home: https://github.com/GoogleCloudPlatform/bank-of-anthos
+sources:
+  - https://github.com/GoogleCloudPlatform/bank-of-anthos

@@ -1,0 +1,118 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    application: bank-of-anthos
+    environment: development
+    team: accounts
+    tier: backend
+  name: contacts
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: contacts
+    application: bank-of-anthos
+    environment: development
+    team: accounts
+    tier: backend
+  type: {{ .Values.contacts.service.type }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    application: bank-of-anthos
+    environment: development
+    team: accounts
+    tier: backend
+  name: contacts
+spec:
+  replicas: {{ .Values.contacts.replicaCount }}
+  selector:
+    matchLabels:
+      app: contacts
+      application: bank-of-anthos
+      environment: development
+      team: accounts
+      tier: backend
+  template:
+    metadata:
+      annotations:
+        proxy.istio.io/config: '{ "holdApplicationUntilProxyStarts": true }'
+      labels:
+        app: contacts
+        application: bank-of-anthos
+        environment: development
+        team: accounts
+        tier: backend
+    spec:
+      {{- with .Values.contacts.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.contacts.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.contacts.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - env:
+            - name: VERSION
+              value: v0.6.10
+            - name: PORT
+              value: "8080"
+            - name: ENABLE_TRACING
+              value: "true"
+            - name: LOG_LEVEL
+              value: info
+          envFrom:
+            - configMapRef:
+                name: environment-config
+            - configMapRef:
+                name: accounts-db-config
+          image: {{ .Values.contacts.image.repository }}:{{ .Values.contacts.image.tag }}
+          name: contacts
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 10
+          resources:
+          {{- toYaml .Values.contacts.resources | nindent 10 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - all
+            privileged: false
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+            - mountPath: /tmp/.ssh
+              name: publickey
+              readOnly: true
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      serviceAccountName: bank-of-anthos
+      terminationGracePeriodSeconds: 5
+      volumes:
+        - emptyDir: {}
+          name: tmp
+        - name: publickey
+          secret:
+            items:
+              - key: jwtRS256.key.pub
+                path: publickey
+            secretName: jwt-key

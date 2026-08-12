@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    application: bank-of-anthos
+    environment: development
+    team: ledger
+    tier: db
+  name: ledger-db
+spec:
+  ports:
+    - name: tcp
+      port: 5432
+      targetPort: 5432
+  selector:
+    app: ledger-db
+    application: bank-of-anthos
+    environment: development
+    team: ledger
+    tier: db
+  type: {{ .Values.ledger_db.service.type }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    application: bank-of-anthos
+    environment: development
+    team: ledger
+    tier: db
+  name: ledger-db
+spec:
+  replicas: {{ .Values.ledger_db.replicaCount }}
+
+  selector:
+    matchLabels:
+      app: ledger-db
+      application: bank-of-anthos
+      environment: development
+      team: ledger
+      tier: db
+  serviceName: ledger-db
+  template:
+    metadata:
+      labels:
+        app: ledger-db
+        application: bank-of-anthos
+        environment: development
+        team: ledger
+        tier: db
+    spec:
+      {{- with .Values.ledger_db.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ledger_db.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ledger_db.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - envFrom:
+            - configMapRef:
+                name: environment-config
+            - configMapRef:
+                name: ledger-db-config
+            - configMapRef:
+                name: demo-data-config
+          image: {{ .Values.ledger_db.image.repository }}:{{ .Values.ledger_db.image.tag }}
+          name: postgres
+          ports:
+            - containerPort: 5432
+          resources:
+          {{- toYaml .Values.ledger_db.resources | nindent 10 }}
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgresdb
+              subPath: postgres
+      serviceAccount: bank-of-anthos
+      serviceAccountName: default
+      volumes:
+        - emptyDir: {}
+          name: postgresdb

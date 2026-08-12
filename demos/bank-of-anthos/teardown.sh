@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
 #
-# teardown.sh — Remove the E-commerce demo.
+# teardown.sh — Remove the Bank of Anthos demo.
 #
-# Deletes the 'demo-ecommerce' namespace. Everything inside it (workloads,
-# services, HPAs, and PDBs) goes with it.
-#
-# metrics-server is intentionally left in place — it is shared by the rest
-# of the workshop. Remove it with: helm uninstall metrics-server -n kube-system
+# Deletes the 'bank-of-anthos' namespace. Everything inside it (workloads,
+# services, the Helm release, the LoadBalancer Service) goes with it.
 #
 # Usage:
 #   ./teardown.sh
@@ -14,7 +11,7 @@
 
 set -euo pipefail
 
-# ANSI colors for messages. Matches setup/*.sh.
+# ANSI colors for messages. Matches demos/ecommerce/teardown.sh.
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -26,7 +23,8 @@ warn() { printf "${YELLOW}[teardown]${NC} %s\n" "$*" >&2; }
 err() { printf "${RED}[teardown]${NC} %s\n" "$*" >&2; }
 info() { printf "${BLUE}[teardown]${NC} %s\n" "$*"; }
 
-NAMESPACE="demo-ecommerce"
+NAMESPACE="bank-of-anthos"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 command_exists() {
   command -v "$1" >/dev/null 2>&1
@@ -48,12 +46,12 @@ main() {
         err "unknown argument: ${arg}"
         exit 1
         ;;
-    esac
+      esac
   done
 
   printf '%b' "${BLUE}"
   printf '============================================================\n'
-  printf '  E-commerce demo — teardown\n'
+  printf '  Bank of Anthos demo — teardown\n'
   printf '============================================================\n'
   printf '%b' "${NC}"
   printf '\n'
@@ -70,6 +68,7 @@ main() {
 
   if ! kubectl get namespace "${NAMESPACE}" >/dev/null 2>&1; then
     log "namespace '${NAMESPACE}' does not exist; nothing to do"
+    rm -f "${SCRIPT_DIR}/.frontend_endpoint"
     return 0
   fi
 
@@ -84,14 +83,15 @@ main() {
   fi
 
   info "deleting namespace '${NAMESPACE}'..."
-  kubectl delete namespace "${NAMESPACE}" --wait=true --timeout=180s
+  kubectl delete namespace "${NAMESPACE}" --wait=true --timeout=300s
+
+  rm -f "${SCRIPT_DIR}/.frontend_endpoint"
 
   printf '\n'
   log "namespace '${NAMESPACE}' removed"
 
   printf '\n'
-  info "metrics-server is left in place (it is shared with other demos)."
-  info "to remove it as well, run: helm uninstall metrics-server -n kube-system"
+  info "the Helm release 'bank-of-anthos' was removed with the namespace."
   printf '\n'
 }
 

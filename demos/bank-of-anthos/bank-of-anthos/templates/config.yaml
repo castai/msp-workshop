@@ -1,0 +1,81 @@
+apiVersion: v1
+data:
+  ACCOUNTS_DB_URI: postgresql://accounts-admin:accounts-pwd@accounts-db:5432/accounts-db
+  POSTGRES_DB: accounts-db
+  POSTGRES_PASSWORD: accounts-pwd
+  POSTGRES_USER: accounts-admin
+kind: ConfigMap
+metadata:
+  labels:
+    app: accounts-db
+    application: bank-of-anthos
+    environment: development
+    team: accounts
+    tier: db
+  name: accounts-db-config
+---
+apiVersion: v1
+data:
+  DEMO_LOGIN_PASSWORD: bankofanthos
+  DEMO_LOGIN_USERNAME: testuser
+  USE_DEMO_DATA: "True"
+kind: ConfigMap
+metadata:
+  name: demo-data-config
+---
+apiVersion: v1
+data:
+  LOCAL_ROUTING_NUM: "883745000"
+  PUB_KEY_PATH: /tmp/.ssh/publickey
+kind: ConfigMap
+metadata:
+  name: environment-config
+---
+# Copyright 2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+apiVersion: v1
+data:
+  POSTGRES_DB: postgresdb
+  POSTGRES_PASSWORD: password
+  POSTGRES_USER: admin
+  SPRING_DATASOURCE_PASSWORD: password
+  SPRING_DATASOURCE_URL: jdbc:postgresql://ledger-db:5432/postgresdb
+  SPRING_DATASOURCE_USERNAME: admin
+kind: ConfigMap
+metadata:
+  labels:
+    app: ledger-db
+    application: bank-of-anthos
+    environment: development
+    team: ledger
+    tier: db
+  name: ledger-db-config
+---
+apiVersion: v1
+data:
+  BALANCES_API_ADDR: balancereader:8080
+  CONTACTS_API_ADDR: contacts:8080
+  HISTORY_API_ADDR: transactionhistory:8080
+  TRANSACTIONS_API_ADDR: ledgerwriter:8080
+  USERSERVICE_API_ADDR: userservice:8080
+kind: ConfigMap
+metadata:
+  name: service-api-config
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    iam.gke.io/gcp-service-account: gke-workload-development@bank-of-anthos-ci.iam.gserviceaccount.com
+  name: bank-of-anthos
