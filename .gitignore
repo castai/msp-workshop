@@ -1,1 +1,6 @@
+# Local environment variables (contains secrets)
+.env
+.env.*
+!.env.example
+
 .kimchi

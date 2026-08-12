@@ -1,21 +1,18 @@
 # MSP Workshop
 
-A hands-on workshop covering MSP workflows on Kubernetes, using a local kind
-cluster as the lab environment.
+A hands-on workshop covering MSP workflows on Kubernetes.
 
 ## Setup
 
-Before working through the lessons, prepare your local environment with the
-one-command setup script at the repository root:
+Before working through the lessons, prepare your local environment by
+running the validator at the repository root:
 
 ```bash
-./setup/setup-all.sh
+./setup/validate-setup.sh
 ```
 
-That script installs Docker, `kubectl`, `helm`, `cast-cli`, creates the
-`workshop-cluster` kind cluster, and verifies it is healthy. Run
-`./setup/setup-all.sh --help` for all options, or
-`./setup/setup-all.sh --recreate` to force a fresh cluster.
+That script installs (or checks) `aws`, `kubectl`, `helm`, and `cast-cli`.
+You bring your own Kubernetes cluster to follow the lessons.
 
 For more detail on what the setup scripts do and how to invoke them
 individually, see [`setup/README.md`](./setup/README.md).

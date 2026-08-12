@@ -86,7 +86,16 @@ install_cast_cli() {
 
   log "cast-cli: not found, installing via get.cast.ai/linux..."
 
-  if ! curl -fsSL https://get.cast.ai/linux | bash; then
+  local cast_installer_tmp
+  cast_installer_tmp="$(mktemp -d)"
+  trap 'rm -rf "${cast_installer_tmp}"' RETURN
+
+  if ! curl -fsSL https://get.cast.ai/linux -o "${cast_installer_tmp}/cast-install.sh"; then
+    err "failed to download cast-cli installer" >&2
+    return 1
+  fi
+
+  if ! bash "${cast_installer_tmp}/cast-install.sh"; then
     err "failed to install cast-cli via get.cast.ai/linux" >&2
     return 1
   fi

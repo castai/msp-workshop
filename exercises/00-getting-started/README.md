@@ -1,75 +1,55 @@
 # Step 0: Getting Started
 
-Welcome to the workshop. This lesson gets your Linux environment ready so you
-can follow along with every exercise that follows. If you just want to get
-going, run the **Quick start** below — it installs everything you need and
-creates a local Kubernetes cluster. The sections that follow explain what the
-script does and how to recover if a step fails.
+Prepare your environment for the workshop.
 
-## Quick start
+## Steps
 
-Run these commands in order. The setup script installs Docker (if missing),
-`kubectl`, `helm`, and `cast-cli`, then creates a local kind cluster named
-`workshop-cluster`. It stops immediately if any step fails.
+1. **Clone the workshop repository**
 
-```bash
-git clone https://github.com/castai/msp-workshop.git $HOME/workshop
-cd $HOME/workshop
-./setup/setup-all.sh
-```
+   ```bash
+   git clone https://github.com/castai/msp-workshop.git $HOME/workshop
+   cd $HOME/workshop
+   ```
 
-If the script prints a message about the `docker` group (this happens after
-Docker is freshly installed), your current shell does not yet have the
-membership applied. Switch to a shell that does and re-run the same setup:
+2. **Install `castctl`**
 
-```bash
-newgrp docker
-./setup/setup-all.sh
-```
+   ```bash
+   ./setup/install-cast-cli.sh
+   ```
 
-When setup finishes successfully, verify the cluster is up:
+3. **Run the setup validator**
 
-```bash
-kubectl get nodes --context kind-workshop-cluster
-```
+   This installs `aws`, `kubectl`, `helm`, and `cast-cli` if any are missing.
 
-You should see a single `Ready` node named something like
-`workshop-cluster-control-plane`.
+   ```bash
+   ./setup/validate-setup.sh
+   ```
 
-> If anything fails, fix the underlying issue and re-run
-> `./setup/setup-all.sh`. It is idempotent. For step-by-step recovery, see
-> the [Troubleshooting Guide](../common/troubleshooting.md).
+4. **Receive AWS credentials**
 
-## What this lesson does
+   The lecturer or workshop host will provide your AWS access key, secret key,
+   and default region.
 
-`./setup/setup-all.sh` is the single entry point for preparing your machine.
-It runs four helper scripts in order and aborts on the first failure:
+5. **Configure your environment**
 
-1. `install-docker.sh` — installs Docker if it is not already present.
-2. `validate-setup.sh` — installs `kubectl`, `helm`, and `cast-cli` if they
-   are missing, and configures the `k=kubectl` shell alias.
-3. `install-kind.sh` — creates the local `workshop-cluster` kind cluster.
-4. `verify-kind.sh` — confirms the cluster is reachable and healthy.
+   Run the Kubernetes configuration script and follow the prompts. The script
+   reads your IAM user name, derives the matching EKS cluster name, and pulls
+   the kubeconfig. Sourcing keeps `AWS_PROFILE=workshop` active in your
+   current shell:
 
-You do not need to run these by hand — `setup-all.sh` orchestrates them for
-you. Re-running it is safe: each step is idempotent and skips work that has
-already been done.
+   ```bash
+   source ./setup/configure-k8s.sh
+   ```
 
-## Prerequisites
+6. **Validate cluster access**
 
-- **A Linux environment** running `bash` (Ubuntu, Debian, Fedora, RHEL, or a
-  derivative).
-- **`curl`** for downloading release artifacts.
-- **Internet access** to GitHub releases and `get.helm.sh`. Configure
-  `HTTP_PROXY` / `HTTPS_PROXY` if you are behind a corporate proxy.
-- **`sudo`** (only if your user cannot write to `/usr/local/bin`).
+   List the Kubernetes cluster nodes to confirm everything is configured:
 
-## Next step
+   ```bash
+   kubectl get nodes
+   ```
 
-When `./setup/setup-all.sh` finishes and
-`kubectl get nodes --context kind-workshop-cluster` shows a `Ready` node, you
-are ready to move on to the next lesson.
+7. **Proceed to the next lesson**
 
-If anything went wrong along the way, see the
-[Troubleshooting Guide](../common/troubleshooting.md) for recovery steps,
-then re-run `./setup/setup-all.sh` to pick up where you left off.
+   Once `kubectl get nodes` returns your cluster nodes, you are ready to
+   continue.

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# reset-lesson.sh — Reset a single lesson namespace while keeping the kind cluster.
+# reset-lesson.sh — Reset a single lesson namespace while leaving the cluster intact.
 #
 # Usage:
 #   ./reset-lesson.sh <namespace>
@@ -25,7 +25,7 @@ info() { printf "${BLUE}[reset-lesson]${NC} %s\n" "$*"; }
 is_protected_namespace() {
   local ns="$1"
   case "${ns}" in
-    default | kube-system | kube-public | kube-node-lease | kind-*)
+    default | kube-system | kube-public | kube-node-lease)
       return 0
       ;;
     *)
@@ -42,7 +42,7 @@ usage() {
   printf 'Usage: %s <namespace>\n' "$0"
   printf '\n'
   printf 'Resets a lesson namespace by deleting and recreating it.\n'
-  printf 'The kind cluster itself is left untouched.\n'
+  printf 'The Kubernetes cluster itself is left untouched.\n'
   printf '\n'
   printf 'Examples:\n'
   printf '  %s lesson-01-workloads\n' "$0"

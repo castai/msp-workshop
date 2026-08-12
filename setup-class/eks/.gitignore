@@ -1,0 +1,15 @@
+# Generated IAM credentials and other secret material produced by create.sh / create-user.sh
+workshop-participant-IAM.md
+
+# Common credential / key file patterns
+*.pem
+*.key
+*.pfx
+*.p12
+
+# Environment files that may contain secrets
+.env
+.env.*
+
+# Generated eksctl ClusterConfig files
+workshop-*-eksctl.yaml

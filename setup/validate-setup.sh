@@ -2,12 +2,14 @@
 #
 # validate-setup.sh — Idempotent validator for the workshop prerequisites.
 #
-# Ensures that the CLIs required by the rest of the workshop (kubectl, helm,
-# cast-cli) are installed and on PATH, and configures the k=kubectl alias.
+# Ensures that the CLIs required by the rest of the workshop (aws, kubectl,
+# helm, cast-cli) are installed and on PATH, and configures the k=kubectl
+# alias.
 #
 # This script is the complete, idempotent validator for the workshop.
-# It checks for kubectl, helm, and cast-cli, installs any that are missing,
-# configures the k=kubectl alias, and prints a final pass/fail summary.
+# It checks for aws, kubectl, helm, and cast-cli, installs any that are
+# missing, configures the k=kubectl alias, and prints a final pass/fail
+# summary.
 #
 # Usage:
 #   ./validate-setup.sh
@@ -62,6 +64,15 @@ kubectl_client_version() {
 helm_client_version() {
   local line
   line="$(helm version --short 2>/dev/null || true)"
+  printf '%s' "${line}"
+}
+
+# Print the AWS CLI version string reported by `aws --version`
+# (e.g. "aws-cli/2.27.0 Python/3.13.0 Linux/..."). Returns nothing if
+# aws is not installed or its output cannot be parsed.
+aws_client_version() {
+  local line
+  line="$(aws --version 2>/dev/null || true)"
   printf '%s' "${line}"
 }
 
@@ -215,6 +226,92 @@ install_helm() {
   fi
 }
 
+# Install the AWS CLI v2 for Linux from the official AWS installer when
+# it is not already present on PATH. Idempotent: if `aws` is found, the
+# function reports the existing version and returns without changes.
+# Downloads the architecture-specific zip (x86_64 or aarch64) from
+# awscli.amazonaws.com into a mktemp directory, unzips it, and runs the
+# bundled `./aws/install` script — with `sudo -n` only when
+# /usr/local/bin is not writable by the current user. Verifies the
+# install via `aws --version`.
+install_aws_cli() {
+  local arch tmp version_output use_sudo
+
+  if command_exists aws; then
+    version_output="$(aws_client_version)"
+    if [[ -n "${version_output}" ]]; then
+      log "aws: found, skipping (${version_output})"
+    else
+      log "aws: found, skipping"
+    fi
+    return 0
+  fi
+
+  if ! command_exists unzip; then
+    log "error: unzip is required to install the AWS CLI; install it via your package manager (e.g. 'sudo apt-get install unzip') and re-run" >&2
+    return 1
+  fi
+
+  case "$(uname -m)" in
+    x86_64)
+      arch="x86_64"
+      ;;
+    aarch64 | arm64)
+      arch="aarch64"
+      ;;
+    *)
+      log "error: unsupported architecture $(uname -m) for AWS CLI v2 installer (need x86_64 or aarch64)" >&2
+      return 1
+      ;;
+  esac
+
+  log "aws: not found, installing AWS CLI v2 (linux-${arch})..."
+
+  tmp="$(mktemp -d)"
+  # Single-quote the trap body so ${tmp} expands when the trap fires.
+  trap 'rm -rf "${tmp}"' RETURN
+
+  if ! curl -fL "https://awscli.amazonaws.com/awscli-exe-linux-${arch}.zip" -o "${tmp}/awscliv2.zip"; then
+    log "error: failed to download AWS CLI v2 zip from awscli.amazonaws.com" >&2
+    return 1
+  fi
+
+  if ! unzip -q "${tmp}/awscliv2.zip" -d "${tmp}"; then
+    log "error: failed to unzip AWS CLI v2 installer" >&2
+    return 1
+  fi
+
+  if [[ -w /usr/local/bin ]]; then
+    use_sudo=0
+  else
+    use_sudo=1
+  fi
+
+  if [[ "${use_sudo}" -eq 1 ]]; then
+    if ! command_exists sudo; then
+      log "error: /usr/local/bin is not writable and sudo is unavailable; cannot install AWS CLI" >&2
+      return 1
+    fi
+    # `sudo -n` keeps the install non-interactive; if elevated auth
+    # cannot proceed it fails fast.
+    sudo -n "${tmp}/aws/install"
+  else
+    "${tmp}/aws/install"
+  fi
+
+  if ! command_exists aws; then
+    log "error: AWS CLI installer finished but 'aws' is not on PATH" >&2
+    return 1
+  fi
+
+  version_output="$(aws_client_version)"
+  if [[ -n "${version_output}" ]]; then
+    log "aws installed: ${version_output}"
+  else
+    log "aws installed"
+  fi
+}
+
 # Install the Cast AI CLI (cast-cli) from the official get.cast.ai/linux
 # installer when it is not already present on PATH. Idempotent: if
 # cast-cli is found, the function reports the existing version and
@@ -237,9 +334,43 @@ install_cast_cli() {
     return 0
   fi
 
+  # The upstream Cast AI installer ships the binary as `castctl`. If
+  # only `castctl` is on PATH (e.g. from a previous install), expose it
+  # as `cast-cli` via a symlink next to the castctl binary instead of
+  # re-running the installer.
+  if command_exists castctl; then
+    castctl_path="$(command -v castctl)"
+    castctl_dir="$(dirname "${castctl_path}")"
+    log "cast-cli: not found, but castctl present at ${castctl_path}; creating cast-cli symlink..."
+    if [[ -w "${castctl_dir}" ]]; then
+      if ln -sf "${castctl_path}" "${castctl_dir}/cast-cli"; then
+        log "cast-cli symlink created at ${castctl_dir}/cast-cli -> ${castctl_path}"
+        return 0
+      fi
+      log "cast-cli: failed to create symlink in ${castctl_dir} (will run full installer)"
+    elif command_exists sudo; then
+      if sudo -n ln -sf "${castctl_path}" "${castctl_dir}/cast-cli" 2>/dev/null; then
+        log "cast-cli symlink created at ${castctl_dir}/cast-cli -> ${castctl_path}"
+        return 0
+      fi
+      log "cast-cli: failed to create symlink in ${castctl_dir} via sudo (will run full installer)"
+    else
+      log "cast-cli: ${castctl_dir} is not writable and sudo is unavailable (will run full installer)"
+    fi
+  fi
+
   log "cast-cli: not found, installing via get.cast.ai/linux..."
 
-  if ! curl -fsSL https://get.cast.ai/linux | bash; then
+  local cast_installer_tmp
+  cast_installer_tmp="$(mktemp -d)"
+  trap 'rm -rf "${cast_installer_tmp}"' RETURN
+
+  if ! curl -fsSL https://get.cast.ai/linux -o "${cast_installer_tmp}/cast-install.sh"; then
+    log "error: failed to download cast-cli installer" >&2
+    return 1
+  fi
+
+  if ! bash "${cast_installer_tmp}/cast-install.sh"; then
     log "error: failed to install cast-cli via get.cast.ai/linux" >&2
     return 1
   fi
@@ -426,6 +557,7 @@ main() {
   local overall_status=0
 
   log "Checking required CLIs..."
+  install_aws_cli || overall_status=1
   install_kubectl || overall_status=1
   install_helm || overall_status=1
   install_cast_cli || overall_status=1
