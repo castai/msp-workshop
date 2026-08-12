@@ -102,15 +102,26 @@ main() {
 
   # 4. Validate
   info "validating cluster access..."
-  if ! kubectl get nodes >/dev/null 2>&1; then
-    err "cannot list cluster nodes. Check your kubeconfig and AWS credentials."
-    exit 1
-  fi
+  info "current kubectl context: $(kubectl config current-context 2>/dev/null || echo 'none')"
+
+  local attempt
+  for attempt in 1 2 3; do
+    if kubectl get nodes; then
+      break
+    fi
+    if [[ "${attempt}" -eq 3 ]]; then
+      err "cannot list cluster nodes after 3 attempts. Check your kubeconfig and AWS credentials."
+      err "active AWS profile: ${AWS_PROFILE:-not set}"
+      err "current kubectl context: $(kubectl config current-context 2>/dev/null || echo 'none')"
+      exit 1
+    fi
+    warn "kubectl get nodes failed (attempt ${attempt}/3), retrying in 5s..."
+    sleep 5
+  done
 
   printf '\n'
   log "environment configured successfully"
   info "AWS_PROFILE=workshop is active in this shell"
-  kubectl get nodes
   printf '\n'
   info "next: proceed to the next workshop lesson"
   info "tip: run 'export AWS_PROFILE=workshop' in new terminals, or add it to your shell profile."
