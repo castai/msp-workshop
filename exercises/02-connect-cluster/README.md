@@ -6,17 +6,21 @@ Connect your Kubernetes cluster to CAST AI through the console.
 
 1. **Open the CAST AI Console**
 
-   Navigate to [https://console.cast.ai](https://console.cast.ai) and sign in
+   Navigate to <a href="https://console.cast.ai" target="_blank" rel="noopener noreferrer">https://console.cast.ai</a> and sign in
    with the account you created earlier.
 
 2. **Start the cluster connection flow**
 
    From the console, click the **Connect cluster** button.
 
+   ![demo page](./images/demo-page.png)
+
 3. **Copy the connection script**
 
    In the connection dialog, switch to the **Linux** tab and copy the provided
    shell script.
+
+   ![copy script](./images/copy-script.png)
 
 4. **Run the script in your terminal**
 
@@ -35,7 +39,11 @@ Connect your Kubernetes cluster to CAST AI through the console.
    that was installed in your cluster. Read through it to confirm the CAST AI
    agent and related components are in place.
 
+   ![instalation summary](./images/summary.png)
+
 7. **Confirm the cluster is connected**
 
-   Return to [https://console.cast.ai](https://console.cast.ai). Your cluster
+   Return to <a href="https://console.cast.ai" target="_blank" rel="noopener noreferrer">https://console.cast.ai</a>. Your cluster
    should appear in the connected state and be ready for the next lessons.
+
+   ![connection confirmation](./images/confirmation.png)

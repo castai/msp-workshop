@@ -201,9 +201,9 @@ managedNodeGroups:
       - c5.large
       - c5.xlarge
       - c6i.large
-    desiredCapacity: 6
-    minSize: 6
-    maxSize: 6
+    desiredCapacity: 4
+    minSize: 4
+    maxSize: 4
     volumeSize: 20
     tags:
       workshop-participant: ${UNIQUE_ID}

@@ -6,7 +6,7 @@ Get familiar with the CAST AI platform by creating your account and exploring th
 
 1. **Open the CAST AI Console**
 
-   Navigate to [https://console.cast.ai](https://console.cast.ai) in your browser.
+   Navigate to <a href="https://console.cast.ai" target="_blank" rel="noopener noreferrer">https://console.cast.ai</a> in your browser.
 
    ![login page](./images/login-page.png)
 
@@ -24,7 +24,7 @@ Get familiar with the CAST AI platform by creating your account and exploring th
 
 4. **Sign in**
 
-   Once your email is validated, return to [https://console.cast.ai](https://console.cast.ai)
+   Once your email is validated, return to <a href="https://console.cast.ai" target="_blank" rel="noopener noreferrer">https://console.cast.ai</a>
    and sign in with your credentials.
 
 5. **Explore the demo cluster environment**
