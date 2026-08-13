@@ -96,7 +96,7 @@ spec:
             periodSeconds: 5
             timeoutSeconds: 10
           resources:
-          {{- toYaml .Values.ledgerwriter.resources | nindent 10 }}
+          {{- toYaml .Values.ledgerwriter.resources | nindent 12 }}
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

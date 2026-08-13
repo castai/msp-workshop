@@ -1,4 +1,4 @@
-# Step 0: Getting Started
+# Getting Started
 
 Prepare your environment for the workshop.
 

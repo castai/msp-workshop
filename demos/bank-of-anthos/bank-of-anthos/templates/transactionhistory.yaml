@@ -109,7 +109,7 @@ spec:
             periodSeconds: 5
             timeoutSeconds: 10
           resources:
-          {{- toYaml .Values.transactionhistory.resources | nindent 10 }}
+          {{- toYaml .Values.transactionhistory.resources | nindent 12 }}
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

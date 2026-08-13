@@ -93,7 +93,7 @@ spec:
             periodSeconds: 5
             timeoutSeconds: 10
           resources:
-          {{- toYaml .Values.userservice.resources | nindent 10 }}
+          {{- toYaml .Values.userservice.resources | nindent 12 }}
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

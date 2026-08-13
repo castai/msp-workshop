@@ -19,10 +19,14 @@ onlineboutique:
   # externalService: false here avoids a duplicate Service.
   frontend:
     externalService: false
+    replicas: 2
 
   # Disable the built-in load generator; the workshop uses its own Locust chart.
   loadGenerator:
     create: false
+
+  currencyService:
+    replicas: 2
 
   # Disable optional components that are not needed in the EKS workshop.
   shoppingAssistantService:

@@ -74,7 +74,7 @@ spec:
           ports:
             - containerPort: 5432
           resources:
-          {{- toYaml .Values.ledger_db.resources | nindent 10 }}
+          {{- toYaml .Values.ledger_db.resources | nindent 12 }}
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
               name: postgresdb
