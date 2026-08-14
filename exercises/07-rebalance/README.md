@@ -1,55 +1,54 @@
-# Step 0: Getting Started
+# Rebalance the Cluster
 
-Prepare your environment for the workshop.
+CAST AI products work in synergy. HPA increases replica count, VPA adjusts
+resources based on usage, Evictor packs workloads densely onto nodes, and the
+Node Autoscaler adds the most suitable nodes for the current situation.
+
+But if you zoom out, a problem appears: slowly growing service load forces the
+autoscaler to add small nodes one at a time. This can leave the cluster with
+four or five different small nodes that are not the most cost-efficient
+configuration. CAST AI solves this with **cluster rebalancing**.
 
 ## Steps
 
-1. **Clone the workshop repository**
+1. **Open the Rebalancer**
 
-   ```bash
-   git clone https://github.com/castai/msp-workshop.git $HOME/workshop
-   cd $HOME/workshop
-   ```
+   In the CAST AI console, navigate to the **Rebalancer** section for your
+   cluster.
 
-2. **Install `castctl`**
+   ![rebalancing list](./images/rebalancing-list.png)
 
-   ```bash
-   ./setup/install-cast-cli.sh
-   ```
+2. **Generate a new rebalancing plan**
 
-3. **Run the setup validator**
+   Click to generate a new plan. CAST AI will analyze the current cluster and
+   propose an optimized configuration. It will show:
+   - The current node layout
+   - The proposed new node layout
+   - Potential savings from the rebalance
 
-   This installs `aws`, `kubectl`, `helm`, and `cast-cli` if any are missing.
+3. **Run a full rebalance**
 
-   ```bash
-   ./setup/validate-setup.sh
-   ```
+   You can choose to rebalance the full cluster or only a subset of nodes. For
+   this workshop, select **Full rebalance**.
 
-4. **Receive AWS credentials**
+   ![rebalancing plan](./images/rebalancing-plan.png)
 
-   The lecturer or workshop host will provide your AWS access key, secret key,
-   and default region.
+4. **Execute the plan**
 
-5. **Configure your environment**
+   Review the proposed plan and click **Execute**. CAST AI will migrate
+   workloads onto the optimized set of nodes.
 
-   Run the Kubernetes configuration script and follow the prompts. The script
-   reads your IAM user name, derives the matching EKS cluster name, and pulls
-   the kubeconfig. Sourcing keeps `AWS_PROFILE=workshop` active in your
-   current shell:
+   ![rebalancing execute](./images/rebalancing-execute.png)
 
-   ```bash
-   source ./setup/configure-k8s.sh
-   ```
+5. **Check the node list**
 
-6. **Validate cluster access**
+   Once the rebalance finishes, open the node list and compare it to the
+   previous configuration. You should see a smaller, more cost-efficient set of
+   nodes running the same workloads.
 
-   List the Kubernetes cluster nodes to confirm everything is configured:
+   ![rebalancing results](./images/rebalancing-results.png)
 
-   ```bash
-   kubectl get nodes
-   ```
+6. **Proceed to the next lesson**
 
-7. **Proceed to the next lesson**
-
-   Once `kubectl get nodes` returns your cluster nodes, you are ready to
-   continue.
+   After confirming the cluster has been rebalanced, continue to the next
+   optimization.
