@@ -1,55 +1,39 @@
-# Step 0: Getting Started
+# Closing
 
-Prepare your environment for the workshop.
+Congratulations — you have completed the CAST AI MSP Workshop!
 
-## Steps
+## What we achieved
 
-1. **Clone the workshop repository**
+During this workshop we took a Kubernetes cluster and an ecommerce application,
+then optimized it end-to-end using the CAST AI platform:
 
-   ```bash
-   git clone https://github.com/castai/msp-workshop.git $HOME/workshop
-   cd $HOME/workshop
-   ```
+- **Connected the cluster** to the CAST AI console
+- **Deployed the Online Boutique demo application** and simulated production
+  load with Locust
+- **Enabled VPA** with a custom `Zero-confidence` scaling policy to right-size
+  workloads and eliminate resource starvation
+- **Enabled Evictor in aggressive mode** to pack workloads densely and drive
+  node consolidation
+- **Enabled Node Autoscaler** with tailored node templates so the cluster adds
+  the right nodes on demand and stays within budget
+- **Configured HPA** to handle sudden traffic spikes by scaling out replicas
+- **Rebalanced the cluster** to replace many small nodes with a more efficient
+  node layout
+- **Configured cluster hibernation** to shut down non-production clusters when
+  they are not needed and wake them back up automatically
 
-2. **Install `castctl`**
+## What we learned
 
-   ```bash
-   ./setup/install-cast-cli.sh
-   ```
+- CAST AI products work together: VPA for long-term resource optimization, HPA
+  for short-term spikes, Evictor for dense bin packing, Node Autoscaler for
+  elastic capacity, and Rebalancer for periodic cluster reshaping.
+- Optimization is not a single action — it is a continuous loop of right-sizing,
+  packing, scaling, rebalancing, and scheduling.
+- Cost savings and performance improvements can be achieved without manual
+  capacity planning or intrusive application changes.
 
-3. **Run the setup validator**
+## Questions and answers
 
-   This installs `aws`, `kubectl`, `helm`, and `cast-cli` if any are missing.
-
-   ```bash
-   ./setup/validate-setup.sh
-   ```
-
-4. **Receive AWS credentials**
-
-   The lecturer or workshop host will provide your AWS access key, secret key,
-   and default region.
-
-5. **Configure your environment**
-
-   Run the Kubernetes configuration script and follow the prompts. The script
-   reads your IAM user name, derives the matching EKS cluster name, and pulls
-   the kubeconfig. Sourcing keeps `AWS_PROFILE=workshop` active in your
-   current shell:
-
-   ```bash
-   source ./setup/configure-k8s.sh
-   ```
-
-6. **Validate cluster access**
-
-   List the Kubernetes cluster nodes to confirm everything is configured:
-
-   ```bash
-   kubectl get nodes
-   ```
-
-7. **Proceed to the next lesson**
-
-   Once `kubectl get nodes` returns your cluster nodes, you are ready to
-   continue.
+Thank you for participating. If you have any questions about what we covered,
+how to apply these optimizations to your own clusters, or what CAST AI can do
+next, this is the time to ask.
