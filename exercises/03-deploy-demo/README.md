@@ -51,6 +51,8 @@ storefront.
    Paste your boutique application load balancer URL, and start simulating user load.
    Switch to graphs view and see latency rise. Go and try to navigate boutique app yourself, you will notice the difference.
 
+   ![locust load graphs](./images/locust-graphs.png)
+
 6. **Proceed to the next section**
 
    Once the application is serving traffic and the load generator is running,
