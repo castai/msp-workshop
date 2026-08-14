@@ -1,55 +1,55 @@
-# Step 0: Getting Started
+# Hibernation
 
-Prepare your environment for the workshop.
+The cluster is now optimized and rebalanced. One last CAST AI feature worth
+showcasing is **cluster hibernation**. Large organizations run CI/CD or
+development clusters that are only needed during business hours. Hibernating
+those clusters overnight or over weekends can significantly reduce cost, and
+CAST AI makes the process painless.
 
 ## Steps
 
-1. **Clone the workshop repository**
+1. **Open Schedules**
 
-   ```bash
-   git clone https://github.com/castai/msp-workshop.git $HOME/workshop
-   cd $HOME/workshop
-   ```
+   In the CAST AI console, navigate to the **Schedules** section.
 
-2. **Install `castctl`**
+   ![hibernation list](./images/hibernate-list.png)
 
-   ```bash
-   ./setup/install-cast-cli.sh
-   ```
+2. **Create a hibernation schedule**
 
-3. **Run the setup validator**
+   Create a new schedule for your cluster and configure it to:
+   - **Hibernate** the cluster in the next 5 minutes
+   - **Resume** the cluster 5 to 10 minutes after hibernation starts
 
-   This installs `aws`, `kubectl`, `helm`, and `cast-cli` if any are missing.
+   ![hibernate create](./images/hibernate-create.png)
 
-   ```bash
-   ./setup/validate-setup.sh
-   ```
+3. **Assign the cluster**
 
-4. **Receive AWS credentials**
+   Assign your connected cluster to the schedule you just created.
 
-   The lecturer or workshop host will provide your AWS access key, secret key,
-   and default region.
+   ![hibernate assign](./images/hibernate-assign.png)
 
-5. **Configure your environment**
+4. **Wait for hibernation**
 
-   Run the Kubernetes configuration script and follow the prompts. The script
-   reads your IAM user name, derives the matching EKS cluster name, and pulls
-   the kubeconfig. Sourcing keeps `AWS_PROFILE=workshop` active in your
-   current shell:
+   Watch the console. After about 5 minutes CAST AI will hibernate the cluster,
+   scaling all workloads down to zero and removing nodes.
 
-   ```bash
-   source ./setup/configure-k8s.sh
-   ```
+   ![hibernated cluster list](./images/cluster-list-hibernated.png)
+   ![hibernated node list](./images/node-list-hibernated.png)
 
-6. **Validate cluster access**
+5. **Wait for wake-up**
 
-   List the Kubernetes cluster nodes to confirm everything is configured:
+   After another 5 to 10 minutes, the schedule will trigger a resume. CAST AI
+   will bring the cluster back online.
 
-   ```bash
-   kubectl get nodes
-   ```
+   ![hibernated cluster list](./images/cluster-list-resuming.png)
+   ![hibernated node list](./images/node-list-resumed.png)
+
+6. **Verify the cluster is running**
+
+   Once the cluster has resumed, check that nodes are back and workloads are
+   running as expected.
 
 7. **Proceed to the next lesson**
 
-   Once `kubectl get nodes` returns your cluster nodes, you are ready to
-   continue.
+   After confirming hibernation and resume both work, continue to the closing
+   section.
