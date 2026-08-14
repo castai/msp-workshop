@@ -15,7 +15,8 @@ workloads.
 
    Go to the **Workload Autoscaler** section.
 
-   ![workload autoscalper page](./images/workload-autoscalper-page.png)
+   ![workload autoscalper page](./images/workload-autoscaler-page.png)
+   ![workload autoscalper page](./images/workload-autoscaler-page-2.png)
 
 3. **Explore the Optimization screen**
 
