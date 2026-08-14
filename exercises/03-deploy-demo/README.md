@@ -40,13 +40,13 @@ storefront.
    Copy the new LoadBalancer URL from the Locust deployment output and open it
    in a second browser tab.
 
-   ![locust application](./images/locust-app.png)
-
 5. **Explore the load generator settings**
 
    In the Locust UI, take a moment to review the available options. Adjust the
    number of users and spawn rate to simulate thousands of concurrent shoppers
    hitting the storefront.
+
+   ![locust application](./images/locust-app.png)
 
    Paste your boutique application load balancer URL, and start simulating user load.
    Switch to graphs view and see latency rise. Go and try to navigate boutique app yourself, you will notice the difference.

@@ -31,6 +31,3 @@ classes:
       - file: "../exercises/09-closing/README.md"
         title: "Closing"
         syntax: "md"
-      - file: "../exercises/common/troubleshooting.md"
-        title: "Troubleshooting Guide"
-        syntax: "md"

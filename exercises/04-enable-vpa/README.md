@@ -15,6 +15,8 @@ workloads.
 
    Go to the **Workload Autoscaler** section.
 
+   ![workload autoscalper page](./images/workload-autoscalper-page.png)
+
 3. **Explore the Optimization screen**
 
    In the **Optimization** screen, filter the table by the `online-boutique`
@@ -86,7 +88,7 @@ workloads.
    `online-boutique` namespace — the entire application runs there — and click
    **Create**.
 
-   ![new rule](./images/new-rule.png)
+   ![new rule](./images/save-rule.png)
 
 8. **Reorder the policy**
 

@@ -1,4 +1,4 @@
-# Step 5: Enable Bin Packing
+# Enable Bin Packing
 
 Now that the application is requesting the resources it actually needs and
 waste is minimized, the next goal is to fight the default Kubernetes scheduler
