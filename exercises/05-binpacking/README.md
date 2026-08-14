@@ -1,55 +1,63 @@
-# Step 0: Getting Started
+# Step 5: Enable Bin Packing
 
-Prepare your environment for the workshop.
+Now that the application is requesting the resources it actually needs and
+waste is minimized, the next goal is to fight the default Kubernetes scheduler
+behavior. Kubernetes spreads workloads evenly across available nodes, but to
+achieve the highest possible savings we want the opposite: pack nodes as densely
+as possible.
+
+CAST AI solves this with the **Evictor** component. Evictor analyzes nodes and
+the workloads running on them, then redistributes workloads within the existing
+nodes. Over time this makes some nodes empty, allowing CAST AI to remove them
+and reduce infrastructure cost.
 
 ## Steps
 
-1. **Clone the workshop repository**
+1. **Observe current workload distribution**
 
-   ```bash
-   git clone https://github.com/castai/msp-workshop.git $HOME/workshop
-   cd $HOME/workshop
-   ```
+   Open the node list in the CAST AI console and look at where the
+   `online-boutique` workloads are running. You will notice that Kubernetes has
+   spread the services across all available nodes. This even distribution is the
+   default scheduler behavior we want to change.
 
-2. **Install `castctl`**
+   ![node list before](./images/node-list-before.png)
+   ![check workloads before](./images/check-workloads-before.png)
 
-   ```bash
-   ./setup/install-cast-cli.sh
-   ```
+2. **Go to the Evictor settings**
 
-3. **Run the setup validator**
+   Find the **Evictor** component in the cluster settings or optimization
+   section.
 
-   This installs `aws`, `kubectl`, `helm`, and `cast-cli` if any are missing.
+   ![evictor settings](./images/evictor-settings.png)
 
-   ```bash
-   ./setup/validate-setup.sh
-   ```
+3. **Enable Evictor in aggressive mode**
 
-4. **Receive AWS credentials**
+   Turn on Evictor and set it to **aggressive mode**. The Online Boutique
+   application includes services that run with only a single replica. In the
+   default mode Evictor will not move such workloads to avoid potential service
+   disruptions, which prevents effective bin packing. Aggressive mode allows
+   Evictor to rebalance these workloads as well, so nodes can be packed more
+   densely.
 
-   The lecturer or workshop host will provide your AWS access key, secret key,
-   and default region.
+   ![evictor enable](./images/evictor-enable.png)
 
-5. **Configure your environment**
+4. **Wait for rebalancing**
 
-   Run the Kubernetes configuration script and follow the prompts. The script
-   reads your IAM user name, derives the matching EKS cluster name, and pulls
-   the kubeconfig. Sourcing keeps `AWS_PROFILE=workshop` active in your
-   current shell:
+   Evictor will begin redistributing workloads to pack nodes more densely. This
+   process is gradual and respects workload disruption budgets. You can watch
+   the node count and workload distribution change over time in the console.
 
-   ```bash
-   source ./setup/configure-k8s.sh
-   ```
+5. **Verify node consolidation**
 
-6. **Validate cluster access**
+   Return to the cluster view after a few minutes. You should see that some
+   nodes have become empty and are being removed, while the remaining nodes run
+   a higher density of workloads.
 
-   List the Kubernetes cluster nodes to confirm everything is configured:
+   **Note:** Node is being removed by CAST AI autoscaler, which is removing empty nodes by default.
 
-   ```bash
-   kubectl get nodes
-   ```
+   ![node list after](./images/node-list-after.png)
+   ![check workloads after](./images/check-workloads-after.png)
 
-7. **Proceed to the next lesson**
+6. **Proceed to the next lesson**
 
-   Once `kubectl get nodes` returns your cluster nodes, you are ready to
-   continue.
+   Once Evictor has consolidated workloads and reduced the node count, lets configure node autoscaler in another lesson.
