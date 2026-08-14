@@ -1,4 +1,4 @@
-# Step 3: Enable VPA
+# Deploy the demo application
 
 Prepare the workshop environment by deploying the demo application and
 simulating production load.
